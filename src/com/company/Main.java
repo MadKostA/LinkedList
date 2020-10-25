@@ -42,25 +42,9 @@ public class Main {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        System.out.println("------------------");
         System.out.println("Total bits: " + count.getTotal());
         System.out.println("Size after: " + list.size());
-
-//        LinkedList<Integer> lol = new LinkedList<>();
-//        for (int i = 0; i < 1000; i++){
-//            lol.add(i);
-//            System.out.print(lol.getElementByIndex(i) + " ");
-//        }
-//        System.out.println();
-//        System.out.println(lol.getElementByIndex(0));
-//        System.out.println(lol.getElementByIndex(1));
-//        System.out.println(lol.getElementByIndex(24));
-//        System.out.println(lol.getElementByIndex(25));
-//        System.out.println(lol.getElementByIndex(26));
-//        System.out.println(lol.getElementByIndex(48));
-//        System.out.println(lol.getElementByIndex(49));
-//        lol.remove(49);
-//        lol.size();
-//        System.out.println(lol.getElementByIndex(48));
 
     }
 }
