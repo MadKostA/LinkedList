@@ -5,29 +5,16 @@ public class CountBits {
     public int countOne = 0; // количество единиц
     public int countThread0 = 0; // количество итераций, совершенных нулевым потоком
     public int countThread1 = 0; // количество итераций, совершенных первым потоком
+    public int realCountZero = 0; // количество нулей, посчитанных средствами языка Java
+    public int realCountOnes = 0; // количество единиц, посчитанных средствами языка Java
     private int total = 0; // сумма нулей и единиц
     private int size = 0; //первоначальный размер списка
     private int finishedThreadsCounter = 0; // счетчик завершенных потоков
     private boolean isGetSize = false; // флаг для проверки установленного размера
-
-
-    // сеттер для рамера списка
-    synchronized private void setSize(LinkedList list){
-        this.size = list.size();
-    }
-
-    // установка флага
-    synchronized private void setIsGetSize(){
-        isGetSize = !isGetSize;
-    }
+    private boolean continueCountFlag = true; // флаг для прекращения подсчета нулей и единиц
 
     public int getTotal(){
         return this.total;
-    }
-
-    // сумма количества нулей и единиц
-    private void sumTotalCount(){
-        total = total + countZero + countOne;
     }
 
     private void sumCountOne(int count){
@@ -38,70 +25,105 @@ public class CountBits {
         countZero = countZero + length - count;
     }
 
-    synchronized private void incFinishedThreadsCounter(){
-        finishedThreadsCounter++;
+    // сеттер для размера списка
+    synchronized private void setSize(LinkedList list){
+        if (!isGetSize){
+            isGetSize = true;
+            this.size = list.size();
+        }
     }
-    // подсчет количества единиц и нулей в двоичной записи чисел
-    synchronized private boolean counting(int mode, LinkedList list){
-        int m;
-        if (mode == 1){
-//            if (list.getElementByIndex(0) != null){
-            if (list.size() != 0){
-                m = (int) list.getElementByIndex(0);
-                list.removeFirst();
-            } else {
-                return false;
-            }
-        } else {
-//            if (list.getElementByIndex(size - countThread0 - countThread1) != null){
-            if(list.size() != 0){
-                m = (int) list.getElementByIndex(list.size() - 1);
-                list.removeLast();
-            } else {
-                return false;
-            }
-        }
-        int n = m;
-        int ones = 0;
-        while (n != 0) {
-            ones++;
-            n &= n-1;
-        }
-        sumCountOne(ones);
-        sumCountZero(Integer.toBinaryString(m).length(), ones);
-        return true;
 
+    // сумма количества нулей и единиц
+    synchronized private void sumTotalCount(){
+        if (finishedThreadsCounter == 1){
+            total = total + countZero + countOne;
+        }
+        else{
+            finishedThreadsCounter++;
+        }
+    }
+
+    // возвращение значения элемента для потока
+    synchronized private int getElementValue(int mode, LinkedList list){
+        if (mode == 1){
+            if (list.getFirst() != null){
+                size--;
+                if (size == 0) {
+                    continueCountFlag = false;
+                }
+                int e = (int)list.getFirst();
+                list.removeFirst();
+                countThread1++;
+                return e;
+            }
+            continueCountFlag = false;
+            return 0;
+        } else {
+            if (list.getLast() != null){
+                size--;
+                if (size == 0){
+                    continueCountFlag = false;
+                }
+                int e = (int)list.getLast();
+                list.removeLast();
+                countThread0++;
+                return e;
+            }
+            continueCountFlag = false;
+            return 0;
+        }
     }
 
     // функция для запуска подсчета одним из потоков;
     // на вход передается ссылка на двусвязный список и модификатор;
     public void bitCount(LinkedList list, int mode) {
         // установка размера
-        if (!isGetSize){
-            setIsGetSize();
-            setSize(list);
-        }
+        setSize(list);
+
         // запускаем функцию счета нулей и единиц в элементе списка
         // считаем количество итераций, проведенных потоком
         // считаем количество завершенных потоков
         switch (mode){
             case 1:
-                while(counting(mode, list)){
-                    countThread1++;
-                }
-                incFinishedThreadsCounter();
+                do{
+                    int m = getElementValue(mode, list);
+                    if (!continueCountFlag){
+                        break;
+                    }
+                    realCountOnes += Integer.bitCount(m);
+                    // остановка выполнения первого потока,
+                    // чтобы оба потока обрабатывали примерно одинаковое количество элементов
+                    // остановка не обязательна, ее можно убрать
+                    int ones = 0;
+                    while (m != 0) {
+                        ones++;
+                        m &= m - 1;
+                    }
+                    sumCountOne(ones);
+                } while(continueCountFlag);
+                // суммируем количество нулей и единиц
+                // выводим общее количество
+                sumTotalCount();
                 break;
             case 0:
-                while(counting(mode, list)){
-                    countThread0++;
-                }
-                incFinishedThreadsCounter();
+                do{
+                    int m = getElementValue(mode, list);
+                    if (!continueCountFlag){
+                        break;
+                    }
+                    int length = Integer.toBinaryString(m).length();
+                    realCountZero = realCountZero + length - Integer.bitCount(m);
+                    int ones = 0;
+                    while (m != 0) {
+                        ones++;
+                        m &= m-1;
+                    }
+                    sumCountZero(length, ones);
+                }while(continueCountFlag);
+                // суммируем количество нулей и единиц
+                // выводим общее количество
+                sumTotalCount();
                 break;
-        }
-        // суммируем количество нулей и единиц
-        // выводим общее количество
-        if (finishedThreadsCounter == 2){
-            sumTotalCount();
         }
     }
 }

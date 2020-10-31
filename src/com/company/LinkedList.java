@@ -49,10 +49,14 @@ public class LinkedList<Type> implements List<Type>{
         return size;
     }
 
-    public void unlinkElement(Element<Type> removingElement) {
+    synchronized public void unlinkElement(Element<Type> removingElement) {
         removingElement.prevElement = null;
         removingElement.nextElement = null;
         removingElement.value = null;
+    }
+
+    synchronized public void decrSize(){
+        size--;
     }
 
     // удаление элемента по его индексу
@@ -74,7 +78,7 @@ public class LinkedList<Type> implements List<Type>{
                 nextElement.prevElement = prevElement;
                 prevElement.nextElement = nextElement;
                 unlinkElement(removingElement);
-                size--;
+                decrSize();
             }
         } else {
             removingElement = lastElement.getPrevElement();
@@ -87,7 +91,7 @@ public class LinkedList<Type> implements List<Type>{
                 nextElement.prevElement = prevElement;
                 prevElement.nextElement = nextElement;
                 unlinkElement(removingElement);
-                size--;
+                decrSize();
             }
         }
     }
@@ -95,7 +99,7 @@ public class LinkedList<Type> implements List<Type>{
 
     // удаление последнего в списке элемента
     @Override
-    public void removeLast() {
+    synchronized public void removeLast() {
         Element<Type> element = lastElement;
         if (element == null)
             throw new NoSuchElementException();
@@ -109,14 +113,14 @@ public class LinkedList<Type> implements List<Type>{
             Element<Type> removingElement = lastElement.prevElement;
             unlinkElement(removingElement);
             lastElement.prevElement = element;
-            size--;
+            decrSize();
         }
     }
 
 
     // удаление первого в списке элемента
     @Override
-    public void removeFirst() {
+    synchronized public void removeFirst() {
         Element<Type> element = firstElement;
         if (element == null)
             throw new NoSuchElementException();
@@ -130,8 +134,16 @@ public class LinkedList<Type> implements List<Type>{
             Element<Type> removingElement = firstElement.nextElement;
             unlinkElement(removingElement);
             firstElement.nextElement = element;
-            size--;
+            decrSize();
         }
+    }
+
+    public Type getFirst() {
+        return firstElement.nextElement.value;
+    }
+
+    public Type getLast() {
+        return lastElement.prevElement.value;
     }
 
     // возвращение значения элемента списка по его индексу
@@ -160,7 +172,7 @@ public class LinkedList<Type> implements List<Type>{
     }
 
     // описание элемента списка
-    private class Element<Type>{
+    private static class Element<Type>{
         private Type value;
         private Element<Type> nextElement;
         private Element<Type> prevElement;

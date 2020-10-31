@@ -3,17 +3,11 @@ package com.company;
 public class Main {
 
     public static void main(String[] args) {
-        int functionCountZeros = 0; // количество нулей, посчитанных встроенными функциями
-        int functionCountOnes = 0; // количество удиниц, посчитанных встроенными функциями
-
 
         LinkedList<Integer> list = new LinkedList<>(); // создание двусвязного списка
         // заполнение двусвязного списка
-        for (int i = 0; i < 10000000; i++){
+        for (int i = 0; i < 10000; i++){
             int b = (int)(Math.random()*2000000 - 1000000);
-            int bitCount = Integer.bitCount(b);
-            functionCountOnes += bitCount;
-            functionCountZeros += Integer.toBinaryString(b).length() - bitCount;
             list.add(b);
         }
 
@@ -21,10 +15,6 @@ public class Main {
         System.out.println("------------------");
         System.out.println("Size before: " + list.size());
         System.out.println("------------------");
-        System.out.println("Ones: " + functionCountOnes);
-        System.out.println("Zeros: " + functionCountZeros);
-        System.out.println("------------------");
-
 
         CountBits count = new CountBits();
 
