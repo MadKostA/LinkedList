@@ -4,9 +4,9 @@ public class Main {
 
     public static void main(String[] args) {
 
-        LinkedList<Integer> list = new LinkedList<>(); // создание двусвязного списка
+        LinkedList<Integer> list = new LinkedList<>(); // создание двусвязного списка/**/
         // заполнение двусвязного списка
-        for (int i = 0; i < 10000; i++){
+        for (int i = 0; i < 100; i++){
             int b = (int)(Math.random()*2000000 - 1000000);
             list.add(b);
         }
@@ -17,7 +17,6 @@ public class Main {
         System.out.println("------------------");
 
         CountBits count = new CountBits();
-
         // поток для счета нулей
         Thread thread0 = new Thread(new MyThread(count, 0, list), "ThreadZero");
         thread0.start();
@@ -35,6 +34,5 @@ public class Main {
         System.out.println("------------------");
         System.out.println("Total bits: " + count.getTotal());
         System.out.println("Size after: " + list.size());
-
     }
 }

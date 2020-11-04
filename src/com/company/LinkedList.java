@@ -59,6 +59,15 @@ public class LinkedList<Type> implements List<Type>{
         size--;
     }
 
+    synchronized private void changeLink(Element<Type> removingElement){
+        Element<Type> nextElement = removingElement.nextElement;
+        Element<Type> prevElement = removingElement.prevElement;
+        nextElement.prevElement = prevElement;
+        prevElement.nextElement = nextElement;
+        unlinkElement(removingElement);
+        decrSize();
+    }
+
     // удаление элемента по его индексу
     @Override
     public void remove(int index) {
@@ -73,12 +82,7 @@ public class LinkedList<Type> implements List<Type>{
                 removingElement = removingElement.getNextElement();
             }
             if (removingElement != null){
-                Element<Type> nextElement = removingElement.nextElement;
-                Element<Type> prevElement = removingElement.prevElement;
-                nextElement.prevElement = prevElement;
-                prevElement.nextElement = nextElement;
-                unlinkElement(removingElement);
-                decrSize();
+                changeLink(removingElement);
             }
         } else {
             removingElement = lastElement.getPrevElement();
@@ -86,12 +90,7 @@ public class LinkedList<Type> implements List<Type>{
                 removingElement = removingElement.getPrevElement();
             }
             if (removingElement != null){
-                Element<Type> nextElement = removingElement.nextElement;
-                Element<Type> prevElement = removingElement.prevElement;
-                nextElement.prevElement = prevElement;
-                prevElement.nextElement = nextElement;
-                unlinkElement(removingElement);
-                decrSize();
+                changeLink(removingElement);
             }
         }
     }
@@ -99,7 +98,7 @@ public class LinkedList<Type> implements List<Type>{
 
     // удаление последнего в списке элемента
     @Override
-    synchronized public void removeLast() {
+    public void removeLast() {
         Element<Type> element = lastElement;
         if (element == null)
             throw new NoSuchElementException();
@@ -120,7 +119,7 @@ public class LinkedList<Type> implements List<Type>{
 
     // удаление первого в списке элемента
     @Override
-    synchronized public void removeFirst() {
+    public void removeFirst() {
         Element<Type> element = firstElement;
         if (element == null)
             throw new NoSuchElementException();

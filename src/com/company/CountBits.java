@@ -1,76 +1,70 @@
 package com.company;
 
 public class CountBits {
-    public int countZero = 0; // количество нулей
-    public int countOne = 0; // количество единиц
-    public int countThread0 = 0; // количество итераций, совершенных нулевым потоком
-    public int countThread1 = 0; // количество итераций, совершенных первым потоком
-    public int realCountZero = 0; // количество нулей, посчитанных средствами языка Java
-    public int realCountOnes = 0; // количество единиц, посчитанных средствами языка Java
+
+    private int countZero = 0; // количество нулей
+    private int countOne = 0; // количество единиц
+    private int countThread0 = 0; // количество итераций, совершенных нулевым потоком
+    private int countThread1 = 0; // количество итераций, совершенных первым потоком
     private int total = 0; // сумма нулей и единиц
-    private int size = 0; //первоначальный размер списка
-    private int finishedThreadsCounter = 0; // счетчик завершенных потоков
-    private boolean isGetSize = false; // флаг для проверки установленного размера
-    private boolean continueCountFlag = true; // флаг для прекращения подсчета нулей и единиц
+    private int size = -1; //первоначальный размер списка
 
     public int getTotal(){
         return this.total;
     }
 
-    private void sumCountOne(int count){
-        countOne += count;
+    public  int getCountZero(){
+        return this.countZero;
     }
 
-    private void sumCountZero(int length, int count){
-        countZero = countZero + length - count;
+    public int getCountOne(){
+        return this.countOne;
+    }
+
+    public int getCountThread0(){
+        return this.countThread0;
+    }
+
+    public int getCountThread1(){
+        return this.countThread1;
     }
 
     // сеттер для размера списка
     synchronized private void setSize(LinkedList list){
-        if (!isGetSize){
-            isGetSize = true;
+        if (size < 0){
             this.size = list.size();
         }
     }
 
     // сумма количества нулей и единиц
-    synchronized private void sumTotalCount(){
-        if (finishedThreadsCounter == 1){
-            total = total + countZero + countOne;
-        }
-        else{
-            finishedThreadsCounter++;
-        }
+    synchronized private void sumTotalCount(int count){
+        total += count;
     }
 
     // возвращение значения элемента для потока
-    synchronized private int getElementValue(int mode, LinkedList list){
+    synchronized private int getElementValue(int mode, LinkedList list) {
         if (mode == 1){
-            if (list.getFirst() != null){
-                size--;
-                if (size == 0) {
-                    continueCountFlag = false;
-                }
-                int e = (int)list.getFirst();
-                list.removeFirst();
-                countThread1++;
-                return e;
+            int v;
+            try {
+                v = (int)list.getFirst();
+            } catch (Exception e){
+                return 0;
             }
-            continueCountFlag = false;
-            return 0;
+            list.removeFirst();
+            countThread1++;
+            size--;
+            return v;
         } else {
-            if (list.getLast() != null){
-                size--;
-                if (size == 0){
-                    continueCountFlag = false;
-                }
-                int e = (int)list.getLast();
-                list.removeLast();
-                countThread0++;
-                return e;
+            int v;
+            try {
+                v = (int) list.getLast();
+            } catch (Exception e){
+                return 1;
             }
-            continueCountFlag = false;
-            return 0;
+            list.removeLast();
+            countThread0++;
+            size--;
+            return v;
         }
     }
 
@@ -79,51 +73,40 @@ public class CountBits {
     public void bitCount(LinkedList list, int mode) {
         // установка размера
         setSize(list);
-
         // запускаем функцию счета нулей и единиц в элементе списка
         // считаем количество итераций, проведенных потоком
         // считаем количество завершенных потоков
         switch (mode){
             case 1:
-                do{
+                do {
                     int m = getElementValue(mode, list);
-                    if (!continueCountFlag){
-                        break;
-                    }
-                    realCountOnes += Integer.bitCount(m);
-                    // остановка выполнения первого потока,
-                    // чтобы оба потока обрабатывали примерно одинаковое количество элементов
-                    // остановка не обязательна, ее можно убрать
                     int ones = 0;
                     while (m != 0) {
                         ones++;
                         m &= m - 1;
                     }
-                    sumCountOne(ones);
-                } while(continueCountFlag);
+                    countOne += ones;
+                } while(size > 0);
                 // суммируем количество нулей и единиц
                 // выводим общее количество
-                sumTotalCount();
+                sumTotalCount(countOne);
                 break;
             case 0:
                 do{
                     int m = getElementValue(mode, list);
-                    if (!continueCountFlag){
-                        break;
-                    }
                     int length = Integer.toBinaryString(m).length();
-                    realCountZero = realCountZero + length - Integer.bitCount(m);
                     int ones = 0;
                     while (m != 0) {
                         ones++;
                         m &= m-1;
                     }
-                    sumCountZero(length, ones);
-                }while(continueCountFlag);
+                    countZero = countZero + length - ones;
+                } while(size > 0);
                 // суммируем количество нулей и единиц
                 // выводим общее количество
-                sumTotalCount();
+                sumTotalCount(countZero);
                 break;
         }
     }
 }
+

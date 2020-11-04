@@ -18,13 +18,11 @@ public class MyThread implements Runnable{
 
         // вывод на результатов в консоль
         if (this.mode == 1){
-            System.out.println("ThreadOne count ones: " + count.countOne);
-            System.out.println("Real count ones: " + count.realCountOnes);
-            System.out.println("ThreadOne number of processed items: " + count.countThread1);
+            System.out.println("ThreadOne count ones: " + count.getCountOne());
+            System.out.println("ThreadOne number of processed items: " + count.getCountThread1());
         } else {
-            System.out.println("ThreadZero count zeros: " + count.countZero);
-            System.out.println("Real count zeros: " + count.realCountZero);
-            System.out.println("ThreadZero number of processed items: " + count.countThread0);
+            System.out.println("ThreadZero count zeros: " + count.getCountZero());
+            System.out.println("ThreadZero number of processed items: " + count.getCountThread0());
         }
 
     }
